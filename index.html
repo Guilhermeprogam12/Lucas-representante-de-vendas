@@ -28,22 +28,16 @@
     </script>
 
     <style>
-        /* Fundo Diferente para PC (Cinza) e Celular (Branco) */
         body { background-color: #e2e8f0; color: #2c2c2c; overflow-x: hidden; touch-action: pan-y; }
         @media (max-width: 640px) { body { background-color: #fafafa; } }
 
-        /* O CONTAINER MÁGICO QUE CENTRALIZA NO PC */
         #app-wrapper {
-            max-width: 480px; /* Largura máxima de "App" */
-            margin: 0 auto;
-            min-height: 100vh;
-            background-color: #fafafa;
-            position: relative;
+            max-width: 480px; margin: 0 auto; min-height: 100vh;
+            background-color: #fafafa; position: relative;
             box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
             display: flex; flex-direction: column;
         }
 
-        /* MENU */
         #menu-screen { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 30px; text-align: center; }
         
         .collection-card {
@@ -59,41 +53,28 @@
         .card-title { font-family: 'Poppins', sans-serif; font-weight: 700; font-size: 1.4rem; text-transform: uppercase; letter-spacing: 1px; color: #2c2c2c; }
         .card-subtitle { font-size: 0.8rem; color: #888; letter-spacing: 2px; text-transform: uppercase; }
 
-        /* VIEWER */
         #viewer-screen { display: none; height: 100vh; flex-direction: column; background: #f5f5f5; }
         #pdf-container { flex: 1; overflow-y: auto; overflow-x: hidden; display: flex; justify-content: center; align-items: flex-start; padding: 20px 0 80px 0; }
         canvas { box-shadow: 0 10px 30px rgba(0,0,0,0.08); max-width: 98%; height: auto !important; border-radius: 4px; background: white; }
         
-        /* CONTROLES (Limitados à largura do App) */
-        .controls { 
-            position: fixed; bottom: 0; left: 50%; transform: translateX(-50%); 
-            width: 100%; max-width: 480px; /* Segue a largura do app */
-            background: #ffffff; border-top: 1px solid #eee; 
-            padding: 12px 20px; display: flex; justify-content: space-between; align-items: center; 
-            z-index: 40; box-shadow: 0 -5px 20px rgba(0,0,0,0.03);
-        }
+        .controls { position: fixed; bottom: 0; left: 50%; transform: translateX(-50%); width: 100%; max-width: 480px; background: #ffffff; border-top: 1px solid #eee; padding: 12px 20px; display: flex; justify-content: space-between; align-items: center; z-index: 40; box-shadow: 0 -5px 20px rgba(0,0,0,0.03); }
         .nav-btn { width: 45px; height: 45px; border-radius: 8px; border: 1px solid #eee; background: white; color: #555; display: flex; align-items: center; justify-content: center; transition: all 0.2s; }
         .nav-btn:active { background: #eee; }
 
-        /* CART FLOAT (Posicionado relativo ao Wrapper no PC) */
-        .cart-float { 
-            position: absolute; top: 85px; right: 20px; 
-            background: #c7b158; color: white; 
-            width: 50px; height: 50px; border-radius: 50%; 
-            display: flex; align-items: center; justify-content: center; 
-            font-size: 1.2rem; box-shadow: 0 5px 15px rgba(199, 177, 88, 0.4); 
-            z-index: 50; cursor: pointer; transition: transform 0.2s;
-        }
+        .cart-float { position: absolute; top: 85px; right: 20px; background: #c7b158; color: white; width: 50px; height: 50px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 1.2rem; box-shadow: 0 5px 15px rgba(199, 177, 88, 0.4); z-index: 50; cursor: pointer; transition: transform 0.2s; }
         .cart-float:active { transform: scale(0.9); }
         .badge { position: absolute; top: -3px; right: -3px; background: #2c2c2c; color: white; font-size: 0.7rem; width: 18px; height: 18px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold; border: 2px solid white; }
 
-        /* MODAL */
         .modal { position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 60; display: none; align-items: center; justify-content: center; backdrop-filter: blur(2px); }
         .modal-box { background: #ffffff; width: 95%; max-width: 450px; max-height: 90vh; border-radius: 16px; display: flex; flex-direction: column; overflow: hidden; box-shadow: 0 20px 40px rgba(0,0,0,0.1); }
         
         .input-gold { width: 100%; padding: 12px; border: 1px solid #eee; border-radius: 8px; outline: none; background: #f9f9f9; transition: all 0.2s; font-size: 0.9rem; }
         .input-gold:focus { border-color: #c7b158; background: white; }
         .label-gold { font-size: 0.7rem; font-weight: bold; text-transform: uppercase; color: #888; margin-bottom: 4px; display: block; margin-left: 2px; }
+        
+        /* Notificação Toast */
+        .toast { position: fixed; bottom: 80px; left: 50%; transform: translateX(-50%); background: #2c2c2c; color: white; padding: 10px 20px; border-radius: 50px; font-size: 0.9rem; opacity: 0; transition: opacity 0.3s; pointer-events: none; z-index: 70; }
+        .toast.show { opacity: 1; }
     </style>
 </head>
 <body>
@@ -132,26 +113,30 @@
 
             <div class="controls">
                 <button onclick="mudarPagina(-1)" class="nav-btn"><i class="fas fa-chevron-left"></i></button>
-                <button onclick="adicionarItem()" class="flex-1 mx-4 bg-gold hover:bg-gold-dark text-white h-12 rounded-lg font-heading font-bold text-sm shadow-md active:scale-95 transition flex items-center justify-center gap-3 uppercase tracking-wider"><i class="fas fa-plus"></i> Adicionar à Lista</button>
+                <button onclick="adicionarItem()" class="flex-1 mx-4 bg-gold hover:bg-gold-dark text-white h-12 rounded-lg font-heading font-bold text-sm shadow-md active:scale-95 transition flex items-center justify-center gap-3 uppercase tracking-wider"><i class="fas fa-plus"></i> Adicionar</button>
                 <button onclick="mudarPagina(1)" class="nav-btn"><i class="fas fa-chevron-right"></i></button>
             </div>
         </div>
 
-    </div> <div id="loading" class="fixed inset-0 flex flex-col items-center justify-center bg-white z-[200] hidden">
-        <i class="fas fa-circle-notch fa-spin text-4xl text-gold"></i>
-        <p class="mt-4 text-gray-400 text-sm font-medium tracking-widest uppercase">Carregando Coleção...</p>
     </div>
+
+    <div id="loading" class="fixed inset-0 flex flex-col items-center justify-center bg-white z-[200] hidden">
+        <i class="fas fa-circle-notch fa-spin text-4xl text-gold"></i>
+        <p class="mt-4 text-gray-400 text-sm font-medium tracking-widest uppercase">Carregando...</p>
+    </div>
+
+    <div id="toast" class="toast">Item adicionado!</div>
 
     <div id="modal-carrinho" class="modal">
         <div class="modal-box">
             <div class="p-5 bg-white border-b border-gray-100 flex justify-between items-center">
-                <h2 class="font-heading font-bold text-lg text-dark">Itens Selecionados</h2>
+                <h2 class="font-heading font-bold text-lg text-dark">Lista de Desejos</h2>
                 <button onclick="fecharCarrinho()" class="text-gray-400 hover:text-dark transition"><i class="fas fa-times text-xl"></i></button>
             </div>
             <div id="lista-itens" class="p-4 overflow-y-auto flex-1 space-y-3 max-h-[40vh] bg-gray-50"></div>
             <div class="p-5 bg-white border-t border-gray-100">
                 <button onclick="abrirCheckout()" class="w-full bg-dark text-white py-4 rounded-xl font-heading font-bold text-lg shadow-lg flex items-center justify-center gap-2 transition hover:bg-black">
-                    Finalizar Pedido <i class="fas fa-arrow-right"></i>
+                    Finalizar <i class="fas fa-arrow-right"></i>
                 </button>
             </div>
         </div>
@@ -163,15 +148,14 @@
                 <h2 class="font-heading font-bold text-lg">Seus Dados</h2>
                 <button onclick="fecharCheckout()" class="text-white hover:text-gray-200"><i class="fas fa-times text-xl"></i></button>
             </div>
-            
             <form id="form-pedido" onsubmit="enviarPedidoFinal(event)" class="p-6 overflow-y-auto flex-1 space-y-4">
                 <div><label class="label-gold">Nome Completo</label><input type="text" id="nome" class="input-gold" placeholder="Seu nome" required></div>
                 <div class="grid grid-cols-2 gap-3">
-                    <div><label class="label-gold">CPF</label><input type="text" id="cpf" class="input-gold" placeholder="000.000.000-00" oninput="mascaraCPF(this)" required></div>
-                    <div><label class="label-gold">WhatsApp</label><input type="tel" id="tel" class="input-gold" placeholder="(XX) 9XXXX-XXXX" oninput="mascaraTel(this)" required></div>
+                    <div><label class="label-gold">CPF</label><input type="text" id="cpf" class="input-gold" placeholder="000..." oninput="mascaraCPF(this)" required></div>
+                    <div><label class="label-gold">WhatsApp</label><input type="tel" id="tel" class="input-gold" placeholder="(XX) 9..." oninput="mascaraTel(this)" required></div>
                 </div>
-                <div><label class="label-gold">Telefone Recado (Opcional)</label><input type="tel" id="tel2" class="input-gold" placeholder="(XX) 9XXXX-XXXX" oninput="mascaraTel(this)"></div>
-                <div><label class="label-gold">Endereço Residencial</label><input type="text" id="endereco" class="input-gold" placeholder="Rua, Número, Bairro, Cidade" required></div>
+                <div><label class="label-gold">Recado (Opcional)</label><input type="tel" id="tel2" class="input-gold" placeholder="(XX) 9..." oninput="mascaraTel(this)"></div>
+                <div><label class="label-gold">Endereço</label><input type="text" id="endereco" class="input-gold" placeholder="Rua, Número..." required></div>
                 <div class="pt-4 border-t border-gray-100 mt-2">
                     <p class="text-xs font-bold text-gold uppercase mb-3">Dados da Empresa</p>
                     <div class="space-y-3">
@@ -186,7 +170,7 @@
 
     <script>
         // ========================================================
-        // LINKS DO SUPABASE (JÁ ATUALIZADOS)
+        // LINKS DO SUPABASE
         // ========================================================
         const URL_MASCULINO = 'https://eirzmdahrbcboqnvkvpk.supabase.co/storage/v1/object/public/catalogo/masculinos_compressed.pdf'; 
         const URL_FEMININO  = 'https://eirzmdahrbcboqnvkvpk.supabase.co/storage/v1/object/public/catalogo/Femininos_compressed.pdf'; 
@@ -198,19 +182,21 @@
         let pdfDoc = null, pageNum = 1, pageRendering = false, pageNumPending = null, catalogoAtual = '', carrinho = [];
         const canvas = document.getElementById('the-canvas'), ctx = canvas.getContext('2d');
 
-        // --- SISTEMA DE ZOOM INTELIGENTE ---
-        function getScale() {
-            const containerWidth = document.getElementById('pdf-container').clientWidth;
-            // Se for PC (> 600px), limitamos a escala para o PDF não ficar gigante e feio
-            // Se for Mobile, usa 98% da largura.
-            const isDesktop = containerWidth > 600;
-            // No Desktop, o container já está limitado pelo CSS (#app-wrapper), então podemos usar width total.
-            // Mas vamos garantir uma qualidade boa (pixel ratio).
-            return containerWidth; 
+        // --- SISTEMA DE LINK DIRETO (DEEP LINKING) ---
+        window.onload = function() {
+            // Verifica se tem parâmetros na URL (ex: ?cat=MASCULINO&pag=450)
+            const params = new URLSearchParams(window.location.search);
+            const cat = params.get('cat');
+            const pag = parseInt(params.get('pag'));
+
+            if(cat && pag) {
+                // Se tiver, carrega direto sem mostrar o menu
+                carregarCatalogo(cat, pag);
+            }
         }
 
         // --- PDF LOGIC ---
-        function carregarCatalogo(tipo) {
+        function carregarCatalogo(tipo, paginaInicial = 1) {
             catalogoAtual = tipo;
             let url = (tipo === 'MASCULINO') ? URL_MASCULINO : URL_FEMININO;
             document.getElementById('menu-screen').style.display = 'none';
@@ -221,17 +207,18 @@
             pdfjsLib.getDocument(url).promise.then(function(pdfDoc_) {
                 pdfDoc = pdfDoc_;
                 document.getElementById('page-count').textContent = pdfDoc.numPages;
-                pageNum = 1;
+                pageNum = paginaInicial; // Usa a página do link ou começa na 1
                 renderPage(pageNum);
                 document.getElementById('loading').classList.add('hidden');
             }).catch(function(error) {
                 document.getElementById('loading').classList.add('hidden');
-                alert("Erro ao carregar PDF. Tente atualizar.");
-                voltarMenu();
+                alert("Erro ao carregar PDF."); voltarMenu();
             });
         }
 
         function voltarMenu() {
+            // Limpa a URL para voltar ao "zero"
+            window.history.pushState({}, document.title, window.location.pathname);
             pdfDoc = null;
             document.getElementById('viewer-screen').style.display = 'none';
             document.getElementById('menu-screen').style.display = 'flex';
@@ -240,32 +227,19 @@
         function renderPage(num) {
             pageRendering = true;
             pdfDoc.getPage(num).then(function(page) {
-                const container = document.getElementById('pdf-container');
-                const containerWidth = container.clientWidth;
-                
-                // Calcula a escala para caber na largura do container (seja mobile ou PC)
+                const containerWidth = document.getElementById('pdf-container').clientWidth;
                 const viewport = page.getViewport({scale: 1});
                 const scale = (containerWidth * 0.98) / viewport.width; 
                 const scaledViewport = page.getViewport({scale: scale});
-
-                canvas.height = scaledViewport.height; 
-                canvas.width = scaledViewport.width;
-
+                canvas.height = scaledViewport.height; canvas.width = scaledViewport.width;
                 const renderContext = { canvasContext: ctx, viewport: scaledViewport };
                 page.render(renderContext).promise.then(function() {
                     pageRendering = false;
                     if (pageNumPending !== null) { renderPage(pageNumPending); pageNumPending = null; }
-                    // Volta o scroll pro topo ao mudar página
-                    container.scrollTop = 0;
                 });
             });
             document.getElementById('page-num').textContent = num;
         }
-
-        // Evento de Resize para ajustar o PDF se mudar o tamanho da janela no PC
-        window.addEventListener('resize', () => {
-            if(pdfDoc) renderPage(pageNum);
-        });
 
         function queueRenderPage(num) { if (pageRendering) pageNumPending = num; else renderPage(num); }
         function mudarPagina(dir) {
@@ -273,6 +247,8 @@
             if(dir === 1 && pageNum >= pdfDoc.numPages) return;
             pageNum += dir; queueRenderPage(pageNum);
         }
+
+        window.addEventListener('resize', () => { if(pdfDoc) renderPage(pageNum); });
 
         // --- CART ---
         function adicionarItem() {
@@ -296,7 +272,13 @@
                 const obs = document.getElementById('prompt-obs').value;
                 carrinho.push({ catalogo: catalogoAtual, pagina: pageNum, obs: obs || "Padrão" });
                 modalPrompt.remove(); atualizarCarrinhoUI();
+                mostrarToast();
             };
+        }
+
+        function mostrarToast() {
+            const t = document.getElementById('toast'); t.classList.add('show');
+            setTimeout(() => t.classList.remove('show'), 2000);
         }
 
         function removerItem(index) { carrinho.splice(index, 1); atualizarCarrinhoUI(); if(carrinho.length === 0) fecharCarrinho(); }
@@ -325,7 +307,6 @@
         // --- CHECKOUT ---
         function abrirCarrinho() { document.getElementById('modal-carrinho').style.display = 'flex'; }
         function fecharCarrinho() { document.getElementById('modal-carrinho').style.display = 'none'; }
-        
         function abrirCheckout() { document.getElementById('modal-carrinho').style.display = 'none'; document.getElementById('modal-checkout').style.display = 'flex'; }
         function fecharCheckout() { document.getElementById('modal-checkout').style.display = 'none'; document.getElementById('modal-carrinho').style.display = 'flex'; }
 
@@ -339,17 +320,22 @@
             const empresa = document.getElementById('empresa').value || "Não informado";
             const endEmpresa = document.getElementById('end_empresa').value || "Não informado";
 
+            // Pega a URL base do site (para criar o link)
+            const baseUrl = window.location.origin + window.location.pathname;
+
             let listaProdutos = "";
-            carrinho.forEach(item => { listaProdutos += `👟 Coleção ${item.catalogo} - Pág ${item.pagina}\n   Obs: ${item.obs}\n\n`; });
+            carrinho.forEach(item => {
+                // GERA O LINK MÁGICO
+                const linkDireto = `${baseUrl}?cat=${item.catalogo}&pag=${item.pagina}`;
+                listaProdutos += `👟 Coleção ${item.catalogo} - Pág ${item.pagina}\n   Obs: ${item.obs}\n   🔗 Link: ${linkDireto}\n\n`;
+            });
 
             const mensagem = `Olá Lucas, tudo bem? me chamo *${nome}*.\nE gostaria dos seguintes itens do catálogo:\n\n${listaProdutos}--------------------------------\n*MEUS DADOS:*\n🆔 CPF: ${cpf}\n📱 WhatsApp: ${tel}\n📞 Recado: ${tel2}\n🏠 Endereço: ${end}\n\n*DADOS DA EMPRESA:*\n💼 Empresa: ${empresa}\n📍 End. Empresa: ${endEmpresa}`;
             window.open(`https://wa.me/${ZAP_LUCAS}?text=${encodeURIComponent(mensagem)}`, '_blank');
         }
 
-        // --- MASKS ---
         function mascaraCPF(i){ let v=i.value.replace(/\D/g,""); v=v.replace(/(\d{3})(\d)/,"$1.$2"); v=v.replace(/(\d{3})(\d)/,"$1.$2"); v=v.replace(/(\d{3})(\d{1,2})$/,"$1-$2"); i.value=v; }
         function mascaraTel(i){ let v=i.value.replace(/\D/g,""); v=v.replace(/^(\d\d)(\d)/g,"($1) $2"); v=v.replace(/(\d{5})(\d)/,"$1-$2"); i.value=v; }
-
     </script>
 </body>
 </html>
