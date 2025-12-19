@@ -3,94 +3,134 @@
 <head>
     <meta charset="utf-8"/>
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
-    <title>Lucas Representante - Catálogos</title>
+    <title>Lucas Vendas - Catálogo Premium</title>
     
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet"/>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.4.120/pdf.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500&family=Poppins:wght@600;700&display=swap" rel="stylesheet">
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        gold: {
+                            DEFAULT: '#c7b158',
+                            dark: '#b39f4e',
+                            light: '#dcd09d'
+                        },
+                        dark: '#2c2c2c'
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                        heading: ['Poppins', 'sans-serif']
+                    }
+                }
+            }
+        }
+    </script>
 
     <style>
-        body { background-color: #0f172a; color: white; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; overflow: hidden; touch-action: pan-y; }
+        body { background-color: #fafafa; color: #2c2c2c; overflow: hidden; touch-action: pan-y; }
         
         /* TELA DE MENU (Escolha) */
-        #menu-screen { position: fixed; inset: 0; z-index: 100; background: #0f172a; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 20px; text-align: center; }
-        .btn-catalogo { width: 100%; max-width: 300px; height: 120px; margin: 10px 0; border-radius: 20px; font-size: 1.5rem; font-weight: bold; text-transform: uppercase; transition: transform 0.2s, box-shadow 0.2s; display: flex; align-items: center; justify-content: center; gap: 15px; position: relative; overflow: hidden; cursor: pointer; border: 2px solid rgba(255,255,255,0.1); }
-        .btn-catalogo:active { transform: scale(0.95); }
-        .btn-masc { background: linear-gradient(135deg, #1e3a8a, #3b82f6); box-shadow: 0 10px 30px rgba(59, 130, 246, 0.4); }
-        .btn-fem { background: linear-gradient(135deg, #831843, #ec4899); box-shadow: 0 10px 30px rgba(236, 72, 153, 0.4); }
+        #menu-screen { position: fixed; inset: 0; z-index: 100; background: #ffffff; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 30px; text-align: center; }
         
-        /* Ícones de fundo nos botões */
-        .bg-icon { position: absolute; right: -10px; bottom: -10px; font-size: 5rem; opacity: 0.2; transform: rotate(-15deg); }
+        /* Cards de Coleção E-commerce Style */
+        .collection-card {
+            width: 100%; max-width: 350px; height: 140px; margin: 15px 0;
+            background: white; border: 1px solid #eee; border-radius: 12px;
+            display: flex; align-items: center; justify-content: space-between;
+            padding: 0 30px; cursor: pointer; transition: all 0.3s ease;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+            position: relative; overflow: hidden;
+        }
+        .collection-card:hover { transform: translateY(-5px); box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1); border-color: #c7b158; }
+        .collection-card::after { content: ''; position: absolute; bottom: 0; left: 0; width: 100%; height: 4px; background: #c7b158; transform: scaleX(0); transform-origin: left; transition: transform 0.3s ease; }
+        .collection-card:hover::after { transform: scaleX(1); }
+        .card-title { font-family: 'Poppins', sans-serif; font-weight: 700; font-size: 1.4rem; text-transform: uppercase; letter-spacing: 1px; color: #2c2c2c; }
+        .card-subtitle { font-size: 0.8rem; color: #888; letter-spacing: 2px; text-transform: uppercase; }
 
         /* VISUALIZADOR */
-        #viewer-screen { display: none; height: 100vh; flex-direction: column; }
+        #viewer-screen { display: none; height: 100vh; flex-direction: column; background: #f5f5f5; }
         
         #pdf-container { 
             flex: 1; overflow-y: auto; overflow-x: hidden;
             display: flex; justify-content: center; align-items: flex-start;
-            padding-top: 10px; padding-bottom: 80px; /* Espaço pro footer */
+            padding: 20px 0 80px 0; /* Espaço pro footer */
         }
-        
-        canvas { box-shadow: 0 10px 30px rgba(0,0,0,0.5); max-width: 95%; height: auto !important; border-radius: 8px; }
+        canvas { box-shadow: 0 10px 30px rgba(0,0,0,0.08); max-width: 98%; height: auto !important; border-radius: 4px; background: white; }
 
-        /* CONTROLES */
+        /* CONTROLES FOOTER */
         .controls { 
             position: fixed; bottom: 0; left: 0; width: 100%; 
-            background: #1e293b; border-top: 1px solid #334155; 
-            padding: 12px; display: flex; justify-content: space-between; align-items: center; 
-            z-index: 40; box-shadow: 0 -5px 20px rgba(0,0,0,0.3);
+            background: #ffffff; border-top: 1px solid #eee; 
+            padding: 12px 20px; display: flex; justify-content: space-between; align-items: center; 
+            z-index: 40; box-shadow: 0 -5px 20px rgba(0,0,0,0.03);
         }
+        .nav-btn { width: 45px; height: 45px; border-radius: 8px; border: 1px solid #eee; background: white; color: #555; display: flex; align-items: center; justify-content: center; transition: all 0.2s; }
+        .nav-btn:active { background: #eee; }
 
         /* BOTÃO FLUTUANTE CARRINHO */
         .cart-float { 
-            position: fixed; top: 80px; right: 20px; 
-            background: #22c55e; color: white; 
+            position: fixed; top: 85px; right: 20px; 
+            background: #c7b158; color: white; 
             width: 50px; height: 50px; border-radius: 50%; 
             display: flex; align-items: center; justify-content: center; 
-            font-size: 1.2rem; box-shadow: 0 5px 15px rgba(0,0,0,0.5); 
+            font-size: 1.2rem; box-shadow: 0 5px 15px rgba(199, 177, 88, 0.4); 
             z-index: 50; cursor: pointer; transition: transform 0.2s;
         }
         .cart-float:active { transform: scale(0.9); }
-        .badge { position: absolute; top: -5px; right: -5px; background: red; font-size: 0.7rem; width: 20px; height: 20px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold; }
+        .badge { position: absolute; top: -3px; right: -3px; background: #2c2c2c; color: white; font-size: 0.7rem; width: 18px; height: 18px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold; border: 2px solid white; }
 
         /* MODAL */
-        .modal { position: fixed; inset: 0; background: rgba(0,0,0,0.9); z-index: 60; display: none; align-items: center; justify-content: center; }
-        .modal-box { background: #1e293b; width: 95%; max-width: 400px; max-height: 80vh; border-radius: 15px; display: flex; flex-direction: column; overflow: hidden; border: 1px solid #334155; }
+        .modal { position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 60; display: none; align-items: center; justify-content: center; backdrop-filter: blur(2px); }
+        .modal-box { background: #ffffff; width: 95%; max-width: 450px; max-height: 85vh; border-radius: 16px; display: flex; flex-direction: column; overflow: hidden; box-shadow: 0 20px 40px rgba(0,0,0,0.1); }
     </style>
 </head>
 <body>
 
     <div id="menu-screen">
-        <div class="mb-8">
-            <h1 class="text-3xl font-black tracking-tighter mb-2">LUCAS <span class="text-blue-500">VENDAS</span></h1>
-            <p class="text-slate-400 text-sm">Selecione o catálogo para iniciar:</p>
+        <div class="mb-10">
+            <h1 class="font-heading text-4xl font-black tracking-tighter mb-2 text-dark">LUCAS <span class="text-gold">VENDAS</span></h1>
+            <div class="h-1 w-20 bg-gold mx-auto mb-4"></div>
+            <p class="text-gray-500 uppercase tracking-widest text-xs font-medium">Selecione sua coleção</p>
         </div>
 
-        <div class="btn-catalogo btn-masc" onclick="carregarCatalogo('MASCULINO')">
-            <i class="fas fa-mars text-3xl"></i> MASCULINO
-            <i class="fas fa-shoe-prints bg-icon"></i>
+        <div class="collection-card" onclick="carregarCatalogo('MASCULINO')">
+            <div>
+                <p class="card-subtitle">Coleção</p>
+                <h2 class="card-title">Masculina</h2>
+            </div>
+            <i class="fas fa-chevron-right text-gold"></i>
         </div>
 
-        <div class="btn-catalogo btn-fem" onclick="carregarCatalogo('FEMININO')">
-            <i class="fas fa-venus text-3xl"></i> FEMININO
-            <i class="fas fa-shopping-bag bg-icon"></i>
+        <div class="collection-card" onclick="carregarCatalogo('FEMININO')">
+            <div>
+                <p class="card-subtitle">Coleção</p>
+                <h2 class="card-title">Feminina</h2>
+            </div>
+            <i class="fas fa-chevron-right text-gold"></i>
         </div>
 
-        <div class="mt-8 text-xs text-slate-500">
-            <p><i class="fab fa-whatsapp"></i> (16) 99142-0161</p>
+        <div class="mt-12 text-sm text-gray-400 flex items-center gap-2">
+            <i class="fab fa-whatsapp text-gold"></i> Atendimento: (16) 99142-0161
         </div>
     </div>
 
     <div id="viewer-screen">
-        <header class="bg-slate-800 p-3 flex justify-between items-center shadow-lg z-50 relative">
-            <button onclick="voltarMenu()" class="bg-slate-700 text-white px-3 py-1 rounded text-xs font-bold flex items-center gap-1 hover:bg-slate-600">
-                <i class="fas fa-arrow-left"></i> Trocar
+        <header class="bg-white p-4 flex justify-between items-center shadow-sm z-50 relative border-b border-gray-100">
+            <button onclick="voltarMenu()" class="text-gray-500 hover:text-gold px-2 flex items-center gap-2 font-medium text-sm transition">
+                <i class="fas fa-arrow-left"></i> Voltar
             </button>
             <div class="text-center">
-                <h2 id="cat-title" class="font-bold text-sm tracking-wide text-blue-400">CATÁLOGO</h2>
-                <p class="text-[10px] text-slate-400">Página <span id="page-num">1</span> de <span id="page-count">--</span></p>
+                <h2 id="cat-title" class="font-heading font-bold text-base tracking-widest text-dark uppercase">CATÁLOGO</h2>
             </div>
-            <div class="w-16"></div> </header>
+            <div class="w-16 text-right text-xs text-gray-400 font-medium">
+                <span id="page-num" class="text-dark font-bold">1</span> / <span id="page-count">--</span>
+            </div>
+        </header>
 
         <div id="btn-cart" class="cart-float hidden" onclick="abrirCarrinho()">
             <i class="fas fa-shopping-bag"></i>
@@ -102,51 +142,51 @@
         </div>
 
         <div class="controls">
-            <button onclick="mudarPagina(-1)" class="bg-slate-700 text-white w-12 h-12 rounded-full active:bg-slate-600"><i class="fas fa-chevron-left"></i></button>
+            <button onclick="mudarPagina(-1)" class="nav-btn"><i class="fas fa-chevron-left"></i></button>
             
-            <button onclick="adicionarItem()" class="flex-1 mx-3 bg-blue-600 hover:bg-blue-500 text-white h-12 rounded-xl font-bold text-sm shadow-lg active:scale-95 transition flex items-center justify-center gap-2">
-                <i class="fas fa-plus-circle"></i> QUERO ESSE!
+            <button onclick="adicionarItem()" class="flex-1 mx-4 bg-gold hover:bg-gold-dark text-white h-12 rounded-lg font-heading font-bold text-sm shadow-md active:scale-95 transition flex items-center justify-center gap-3 uppercase tracking-wider">
+                <i class="fas fa-plus"></i> Adicionar à Lista
             </button>
 
-            <button onclick="mudarPagina(1)" class="bg-slate-700 text-white w-12 h-12 rounded-full active:bg-slate-600"><i class="fas fa-chevron-right"></i></button>
+            <button onclick="mudarPagina(1)" class="nav-btn"><i class="fas fa-chevron-right"></i></button>
         </div>
     </div>
 
-    <div id="loading" class="fixed inset-0 flex flex-col items-center justify-center bg-slate-900 z-[200] hidden">
-        <i class="fas fa-spinner fa-spin text-4xl text-blue-500"></i>
-        <p class="mt-4 text-slate-400 text-sm">Carregando PDF...</p>
+    <div id="loading" class="fixed inset-0 flex flex-col items-center justify-center bg-white z-[200] hidden">
+        <i class="fas fa-circle-notch fa-spin text-4xl text-gold"></i>
+        <p class="mt-4 text-gray-400 text-sm font-medium tracking-widest uppercase">Carregando Coleção...</p>
     </div>
 
     <div id="modal-carrinho" class="modal">
         <div class="modal-box">
-            <div class="p-4 bg-slate-800 border-b border-slate-700 flex justify-between items-center">
-                <h2 class="font-bold text-white"><i class="fab fa-whatsapp mr-2 text-green-500"></i>Itens para Orçamento</h2>
-                <button onclick="fecharCarrinho()" class="text-slate-400"><i class="fas fa-times text-xl"></i></button>
+            <div class="p-5 bg-white border-b border-gray-100 flex justify-between items-center">
+                <h2 class="font-heading font-bold text-lg text-dark">Sua Lista de Desejos</h2>
+                <button onclick="fecharCarrinho()" class="text-gray-400 hover:text-dark transition"><i class="fas fa-times text-xl"></i></button>
             </div>
-            <div id="lista-itens" class="p-4 overflow-y-auto flex-1 space-y-3 max-h-[50vh]"></div>
-            <div class="p-4 bg-slate-900 border-t border-slate-700">
-                <button onclick="enviarZap()" class="w-full bg-green-600 text-white py-3 rounded-lg font-bold shadow-lg">Enviar Pedido no WhatsApp</button>
+            
+            <div id="lista-itens" class="p-4 overflow-y-auto flex-1 space-y-3 max-h-[50vh] bg-gray-50"></div>
+            
+            <div class="p-5 bg-white border-t border-gray-100">
+                 <p class="text-xs text-gray-500 text-center mb-3">Ao enviar, verificaremos a disponibilidade.</p>
+                <button onclick="enviarZap()" class="w-full bg-[#25D366] hover:bg-[#1ebc57] text-white py-4 rounded-xl font-heading font-bold text-lg shadow-lg flex items-center justify-center gap-2 transition">
+                    <i class="fab fa-whatsapp text-2xl"></i> Solicitar Orçamento
+                </button>
             </div>
         </div>
     </div>
 
     <script>
         // ========================================================
-        // ⚠️ COLE OS LINKS DOS SEUS PDFs AQUI EMBAIXO
+        // 🔗 LINKS DOS SEUS PDFs
         // ========================================================
         
         const URL_MASCULINO = 'https://eirzmdahrbcboqnvkvpk.supabase.co/storage/v1/object/public/catalogo/masculinos_compressed.pdf'; 
         const URL_FEMININO  = 'https://eirzmdahrbcboqnvkvpk.supabase.co/storage/v1/object/public/catalogo/Femininos_compressed.pdf'; 
 
-        // Se quiser testar sem ter os links ainda, use estes de exemplo (remova depois):
-        // const URL_MASCULINO = 'https://raw.githubusercontent.com/mozilla/pdf.js/ba2edeae/web/compressed.tracemonkey-pldi-09.pdf';
-        // const URL_FEMININO  = 'https://raw.githubusercontent.com/mozilla/pdf.js/ba2edeae/web/compressed.tracemonkey-pldi-09.pdf';
-
         const ZAP_LUCAS = "5516991420161";
 
         // ========================================================
 
-        // Configuração PDF.js
         pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.4.120/pdf.worker.min.js';
 
         let pdfDoc = null;
@@ -155,27 +195,20 @@
         let pageNumPending = null;
         let catalogoAtual = '';
         let carrinho = [];
-        
         const canvas = document.getElementById('the-canvas');
         const ctx = canvas.getContext('2d');
 
-        // --- NAVEGAÇÃO ---
         function carregarCatalogo(tipo) {
             catalogoAtual = tipo;
             let url = (tipo === 'MASCULINO') ? URL_MASCULINO : URL_FEMININO;
 
-            // UI Changes
             document.getElementById('menu-screen').style.display = 'none';
             document.getElementById('viewer-screen').style.display = 'flex';
             document.getElementById('loading').classList.remove('hidden');
-            document.getElementById('cat-title').innerText = tipo;
             
-            // Estilização do Header
-            const headerTitle = document.getElementById('cat-title');
-            if(tipo === 'MASCULINO') { headerTitle.className = "font-bold text-sm tracking-wide text-blue-400"; }
-            else { headerTitle.className = "font-bold text-sm tracking-wide text-pink-400"; }
+            const title = document.getElementById('cat-title');
+            title.innerText = `COLEÇÃO ${tipo}`;
 
-            // Load PDF
             pdfjsLib.getDocument(url).promise.then(function(pdfDoc_) {
                 pdfDoc = pdfDoc_;
                 document.getElementById('page-count').textContent = pdfDoc.numPages;
@@ -184,26 +217,25 @@
                 document.getElementById('loading').classList.add('hidden');
             }).catch(function(error) {
                 document.getElementById('loading').classList.add('hidden');
-                alert("Erro ao carregar o PDF! Verifique se o link está correto.");
+                alert("Erro ao carregar o catálogo. Tente atualizar a página.");
                 console.error(error);
                 voltarMenu();
             });
         }
 
         function voltarMenu() {
-            pdfDoc = null; // Limpa memória
+            pdfDoc = null;
             document.getElementById('viewer-screen').style.display = 'none';
             document.getElementById('menu-screen').style.display = 'flex';
         }
 
-        // --- RENDERIZAR PÁGINA ---
         function renderPage(num) {
             pageRendering = true;
             pdfDoc.getPage(num).then(function(page) {
                 const containerWidth = document.getElementById('pdf-container').clientWidth;
-                // Calculamos a escala para caber na largura da tela
+                // Ajuste para qualidade visual
                 const viewport = page.getViewport({scale: 1});
-                const scale = (containerWidth * 0.96) / viewport.width; // 96% da largura
+                const scale = (containerWidth * 0.98) / viewport.width; 
                 const scaledViewport = page.getViewport({scale: scale});
 
                 canvas.height = scaledViewport.height;
@@ -235,19 +267,31 @@
             queueRenderPage(pageNum);
         }
 
-        // --- CARRINHO ---
         function adicionarItem() {
-            const tamanho = prompt(`Você gostou do item da PÁGINA ${pageNum} (${catalogoAtual}).\n\nQual tamanho/cor você deseja?`);
-            
-            carrinho.push({
-                catalogo: catalogoAtual,
-                pagina: pageNum,
-                obs: tamanho || "Padrão"
-            });
+            // Prompt personalizado (não usa alert feio)
+            const modalPrompt = document.createElement('div');
+            modalPrompt.className = 'fixed inset-0 bg-black/50 z-[70] flex items-center justify-center p-4 backdrop-blur-sm';
+            modalPrompt.innerHTML = `
+                <div class="bg-white rounded-xl p-6 w-full max-w-sm shadow-2xl">
+                    <h3 class="font-heading font-bold text-lg mb-2 text-dark">Adicionar Item</h3>
+                    <p class="text-gray-600 text-sm mb-4">Item da <span class="font-bold text-gold">Página ${pageNum}</span> selecionado.</p>
+                    <label class="block text-xs font-bold text-gray-500 uppercase mb-1">Qual tamanho/cor?</label>
+                    <input type="text" id="prompt-obs" class="w-full border border-gray-300 p-3 rounded-lg mb-4 outline-none focus:border-gold" placeholder="Ex: Tam 40, Cor Azul...">
+                    <div class="flex gap-2">
+                        <button onclick="this.closest('.fixed').remove()" class="flex-1 py-3 rounded-lg border border-gray-300 font-medium text-gray-600 transition hover:bg-gray-50">Cancelar</button>
+                        <button onclick="confirmarAdicao()" class="flex-1 py-3 rounded-lg bg-gold text-white font-bold hover:bg-gold-dark transition shadow-md">Adicionar</button>
+                    </div>
+                </div>
+            `;
+            document.body.appendChild(modalPrompt);
+            document.getElementById('prompt-obs').focus();
 
-            // Feedback visual
-            alert("✅ Adicionado à lista!");
-            atualizarCarrinhoUI();
+            window.confirmarAdicao = function() {
+                const obs = document.getElementById('prompt-obs').value;
+                carrinho.push({ catalogo: catalogoAtual, pagina: pageNum, obs: obs || "Padrão" });
+                modalPrompt.remove();
+                atualizarCarrinhoUI();
+            };
         }
 
         function removerItem(index) {
@@ -259,27 +303,24 @@
         function atualizarCarrinhoUI() {
             const count = document.getElementById('cart-count');
             const btn = document.getElementById('btn-cart');
-            
             count.innerText = carrinho.length;
-            if(carrinho.length > 0) btn.classList.remove('hidden');
-            else btn.classList.add('hidden');
+            if(carrinho.length > 0) btn.classList.remove('hidden'); else btn.classList.add('hidden');
 
             const lista = document.getElementById('lista-itens');
             lista.innerHTML = '';
 
             carrinho.forEach((item, i) => {
-                const corBadge = item.catalogo === 'MASCULINO' ? 'bg-blue-600' : 'bg-pink-600';
-                
+                const badgeColor = item.catalogo === 'MASCULINO' ? 'bg-blue-50 text-blue-700' : 'bg-pink-50 text-pink-700';
                 lista.innerHTML += `
-                    <div class="flex justify-between items-center bg-slate-700 p-3 rounded mb-2 border border-slate-600">
+                    <div class="flex justify-between items-center bg-white p-4 rounded-xl mb-2 border border-gray-100 shadow-sm">
                         <div>
                             <div class="flex items-center gap-2 mb-1">
-                                <span class="text-[10px] ${corBadge} px-2 py-0.5 rounded text-white font-bold">${item.catalogo}</span>
-                                <span class="font-bold text-white text-sm">Pág. ${item.pagina}</span>
+                                <span class="text-[10px] ${badgeColor} px-2 py-0.5 rounded font-bold uppercase tracking-wider">${item.catalogo.substring(0, 4)}.</span>
+                                <span class="font-heading font-bold text-dark text-sm">Página ${item.pagina}</span>
                             </div>
-                            <p class="text-xs text-slate-300">Obs: ${item.obs}</p>
+                            <p class="text-xs text-gray-500 font-medium"><span class="text-gold">Obs:</span> ${item.obs}</p>
                         </div>
-                        <button onclick="removerItem(${i})" class="text-red-400 p-2"><i class="fas fa-trash"></i></button>
+                        <button onclick="removerItem(${i})" class="text-gray-400 hover:text-red-500 p-2 transition"><i class="fas fa-trash"></i></button>
                     </div>
                 `;
             });
@@ -287,21 +328,17 @@
 
         function enviarZap() {
             if(carrinho.length === 0) return;
-
-            let msg = "*OLÁ LUCAS! GOSTEI DESSES ITENS:* 📋\n\n";
+            let msg = "*OLÁ LUCAS! QUERO ORÇAMENTO DESSES ITENS:* 🛍️\n\n";
             carrinho.forEach(item => {
-                const icone = item.catalogo === 'MASCULINO' ? '🧢' : '👠';
-                msg += `${icone} *${item.catalogo}* - Pág ${item.pagina}\n   Obs: ${item.obs}\n\n`;
+                const icone = item.catalogo === 'MASCULINO' ? '🤵' : '👩';
+                msg += `${icone} *Coleção ${item.catalogo}* - Pág ${item.pagina}\n   📝 Obs: ${item.obs}\n\n`;
             });
             msg += "_Enviado pelo Catálogo Digital_";
-
-            const link = `https://wa.me/${ZAP_LUCAS}?text=${encodeURIComponent(msg)}`;
-            window.open(link, '_blank');
+            window.open(`https://wa.me/${ZAP_LUCAS}?text=${encodeURIComponent(msg)}`, '_blank');
         }
 
         function abrirCarrinho() { document.getElementById('modal-carrinho').style.display = 'flex'; }
         function fecharCarrinho() { document.getElementById('modal-carrinho').style.display = 'none'; }
-
     </script>
 </body>
 </html>
