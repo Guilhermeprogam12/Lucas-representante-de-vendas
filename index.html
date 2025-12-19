@@ -72,7 +72,6 @@
         .input-gold:focus { border-color: #c7b158; background: white; }
         .label-gold { font-size: 0.7rem; font-weight: bold; text-transform: uppercase; color: #888; margin-bottom: 4px; display: block; margin-left: 2px; }
         
-        /* Notificação Toast */
         .toast { position: fixed; bottom: 80px; left: 50%; transform: translateX(-50%); background: #2c2c2c; color: white; padding: 10px 20px; border-radius: 50px; font-size: 0.9rem; opacity: 0; transition: opacity 0.3s; pointer-events: none; z-index: 70; }
         .toast.show { opacity: 1; }
     </style>
@@ -170,11 +169,17 @@
 
     <script>
         // ========================================================
-        // LINKS DO SUPABASE
+        // 1. LINKS DOS SEUS PDFs
         // ========================================================
         const URL_MASCULINO = 'https://eirzmdahrbcboqnvkvpk.supabase.co/storage/v1/object/public/catalogo/masculinos_compressed.pdf'; 
         const URL_FEMININO  = 'https://eirzmdahrbcboqnvkvpk.supabase.co/storage/v1/object/public/catalogo/Femininos_compressed.pdf'; 
         const ZAP_LUCAS = "5516991420161";
+        
+        // 2. SEU SITE ONLINE (IMPORTANTE PARA O LINK FUNCIONAR!)
+        // Coloque o link do seu GitHub Pages aqui. Ex: https://guilhermeprogam12.github.io/catalogo
+        // Se deixar vazio, ele tenta adivinhar, mas pode falhar se você testar do computador.
+        const SEU_SITE_ONLINE = ""; 
+
         // ========================================================
 
         pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.4.120/pdf.worker.min.js';
@@ -182,17 +187,12 @@
         let pdfDoc = null, pageNum = 1, pageRendering = false, pageNumPending = null, catalogoAtual = '', carrinho = [];
         const canvas = document.getElementById('the-canvas'), ctx = canvas.getContext('2d');
 
-        // --- SISTEMA DE LINK DIRETO (DEEP LINKING) ---
+        // --- DEEP LINKING (Link direto) ---
         window.onload = function() {
-            // Verifica se tem parâmetros na URL (ex: ?cat=MASCULINO&pag=450)
             const params = new URLSearchParams(window.location.search);
             const cat = params.get('cat');
             const pag = parseInt(params.get('pag'));
-
-            if(cat && pag) {
-                // Se tiver, carrega direto sem mostrar o menu
-                carregarCatalogo(cat, pag);
-            }
+            if(cat && pag) carregarCatalogo(cat, pag);
         }
 
         // --- PDF LOGIC ---
@@ -207,7 +207,7 @@
             pdfjsLib.getDocument(url).promise.then(function(pdfDoc_) {
                 pdfDoc = pdfDoc_;
                 document.getElementById('page-count').textContent = pdfDoc.numPages;
-                pageNum = paginaInicial; // Usa a página do link ou começa na 1
+                pageNum = paginaInicial;
                 renderPage(pageNum);
                 document.getElementById('loading').classList.add('hidden');
             }).catch(function(error) {
@@ -217,7 +217,6 @@
         }
 
         function voltarMenu() {
-            // Limpa a URL para voltar ao "zero"
             window.history.pushState({}, document.title, window.location.pathname);
             pdfDoc = null;
             document.getElementById('viewer-screen').style.display = 'none';
@@ -271,16 +270,11 @@
             window.confirmarAdicao = function() {
                 const obs = document.getElementById('prompt-obs').value;
                 carrinho.push({ catalogo: catalogoAtual, pagina: pageNum, obs: obs || "Padrão" });
-                modalPrompt.remove(); atualizarCarrinhoUI();
-                mostrarToast();
+                modalPrompt.remove(); atualizarCarrinhoUI(); mostrarToast();
             };
         }
 
-        function mostrarToast() {
-            const t = document.getElementById('toast'); t.classList.add('show');
-            setTimeout(() => t.classList.remove('show'), 2000);
-        }
-
+        function mostrarToast() { const t = document.getElementById('toast'); t.classList.add('show'); setTimeout(() => t.classList.remove('show'), 2000); }
         function removerItem(index) { carrinho.splice(index, 1); atualizarCarrinhoUI(); if(carrinho.length === 0) fecharCarrinho(); }
 
         function atualizarCarrinhoUI() {
@@ -320,12 +314,12 @@
             const empresa = document.getElementById('empresa').value || "Não informado";
             const endEmpresa = document.getElementById('end_empresa').value || "Não informado";
 
-            // Pega a URL base do site (para criar o link)
-            const baseUrl = window.location.origin + window.location.pathname;
+            // GERAÇÃO DO LINK MÁGICO
+            // Se você configurou a variável lá em cima, usa ela. Se não, tenta descobrir sozinho.
+            const baseUrl = SEU_SITE_ONLINE || (window.location.origin + window.location.pathname);
 
             let listaProdutos = "";
             carrinho.forEach(item => {
-                // GERA O LINK MÁGICO
                 const linkDireto = `${baseUrl}?cat=${item.catalogo}&pag=${item.pagina}`;
                 listaProdutos += `👟 Coleção ${item.catalogo} - Pág ${item.pagina}\n   Obs: ${item.obs}\n   🔗 Link: ${linkDireto}\n\n`;
             });
